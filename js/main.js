@@ -1,86 +1,88 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
 
-let camera, scene, renderer, cube;
+let camera, scene, renderer, cube, controls;
 const perspectiveDistance = 2.5;
-const canvas1 = document.getElementById('c1')
-const canvas2 = document.getElementById('c2')
-const canvas3 = document.getElementById('c3')
-const canvas4 = document.getElementById('c4')
 
 function init() {
     scene = new THREE.Scene();
-    // camera = makePerspectiveCamera();
+    camera = makePerspectiveCamera();
     // camera.aspect = window.innerWidth / window.innerHeight;
-    // camera.position.set(0, 0, perspectiveDistance);
+    camera.position.set(0, 0, perspectiveDistance);
     // camera.position.z = 2;
     // const scene = new THREE.Scene()
-    const camera1 = new THREE.PerspectiveCamera(75, 1, 0.1, 10)
-    const camera2 = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10)
-    const camera3 = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10)
-    const camera4 = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10)
-    const renderer1 = new THREE.WebGLRenderer({ canvas: canvas1 })
-    renderer1.setSize(243, 243)
-    const renderer2 = new THREE.WebGLRenderer({ canvas: canvas2 })
-    renderer2.setSize(243, 243)
-    const renderer3 = new THREE.WebGLRenderer({ canvas: canvas3 })
-    renderer3.setSize(243, 243)
-    const renderer4 = new THREE.WebGLRenderer({ canvas: canvas4 })
-    renderer4.setSize(243, 243)
     //document.body.appendChild(renderer.domElement)
-    const controls = new OrbitControls(camera1, renderer1.domElement)
-    const geometry = new THREE.BoxGeometry()
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true })
-    const cube = new THREE.Mesh(geometry, material)
-    scene.add(cube)
-    camera1.position.z = 2
-    camera2.position.y = 1
-    camera2.lookAt(new THREE.Vector3(0, 0, 0))
-    camera3.position.z = 1
-    camera4.position.x = 1
-    camera4.lookAt(new THREE.Vector3(0, 0, 0))
-    const animate = function () {
-        requestAnimationFrame(animate)
-        cube.rotation.x += 0.01
-        cube.rotation.y += 0.01
-        controls.update()
-        renderer1.render(scene, camera1)
-        renderer2.render(scene, camera2)
-        renderer3.render(scene, camera3)
-        renderer4.render(scene, camera4)
-    }
-    animate()
 
-    // renderer = new THREE.WebGLRenderer();
-    // renderer.setSize(window.innerWidth, window.innerHeight);
-    // renderer.setPixelRatio(window.devicePixelRatio);
-    // renderer.outputEncoding = THREE.sRGBEncoding;
-    // renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    // renderer.toneMappingExposure = 3;
-    // renderer.domElement.style.background = 'linear-gradient(180deg, rgba(0, 0, 0, 1) 0%, rgba(128,128,255,1) 100%)';
+    renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 3;
+    renderer.domElement.style.background = 'linear-gradient(180deg, rgba(0, 0, 0, 1) 0%, rgba(128,128,255,1) 100%)';
 
-    // document.body.appendChild(renderer.domElement);
-    // new OrbitControls(camera, renderer.domElement);
+    document.body.appendChild(renderer.domElement);
+    controls = new OrbitControls(camera, renderer.domElement);
 
     // const controls = new OrbitControls(camera1, renderer1.domElement)
 
-    // const geometry = new THREE.BoxGeometry(1, 1, 1);
-    // const material = new THREE.MeshBasicMaterial({ color: 'linear-gradient(180deg, rgba(0, 0, 0, 1) 0%, rgba(128,128,255,1) 100%)', wireframe: true });
-    // cube = new THREE.Mesh(geometry, material);
-    // scene.add(cube);
-    // window.addEventListener('resize', onResize);
-    // render();
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+    cube = new THREE.Mesh(geometry, material);
+    scene.add(cube);
+    scene.add(new THREE.AxesHelper(5))
+    window.addEventListener('resize', onResize);
+    // window.addEventListener('change', render);
+
+    const gui = new GUI();
+    const cubeFolder = gui.addFolder('Cube');
+    cubeFolder.add(cube.rotation, 'x', 0, Math.PI * 2)
+    cubeFolder.add(cube.rotation, 'y', 0, Math.PI * 2)
+    cubeFolder.add(cube.rotation, 'z', 0, Math.PI * 2)
+    cubeFolder.open();
+    const cameraFolder = gui.addFolder('Camera');
+    cameraFolder.add(camera.position, 'z', 0, 10);
+    cameraFolder.open()
+    const cubePositionFolder = cubeFolder.addFolder('Position')
+    cubePositionFolder.add(cube.position, 'x', -10, 10, 2)
+    cubePositionFolder.add(cube.position, 'y', -10, 10, 2)
+    cubePositionFolder.add(cube.position, 'z', -10, 10, 2)
+    cubeFolder.open()
+    cubePositionFolder.open()
+    const cubeScaleFolder = cubeFolder.addFolder('Scale')
+    cubeScaleFolder.add(cube.scale, 'x', -5, 5)
+    cubeScaleFolder.add(cube.scale, 'y', -5, 5)
+    cubeScaleFolder.add(cube.scale, 'z', -5, 5)
+    render();
 
 
 }
 
 
 // --------------------------------------------------------------
+
+function stats() {
+    const script = document.createElement('script');
+    script.onload = function () {
+        var stats = new Stats();
+        document.body.appendChild(stats.dom);
+        requestAnimationFrame(function loop() {
+            stats.update();
+            requestAnimationFrame(loop)
+        }
+        );
+    };
+    script.src = '//mrdoob.github.io/stats.js/build/stats.min.js';
+    document.head.appendChild(script);
+}
+stats()
+
 function render() {
     renderer.render(scene, camera);
 }
-function makePerspectiveCamera(fov = 75, aspect = window.innerWidth / window.innerHeight, near = 0.1, far = 10) {
+function makePerspectiveCamera(fov = 75, aspect = (window.innerWidth / window.innerHeight), near = 0.1, far = 10) {
     // const fov = 75;
     // const aspect = window.innerWidth / window.innerHeight;
     // const near = 0.1;
@@ -95,12 +97,13 @@ function onResize() {
     render();
 }
 
-// function animate() {
-//     requestAnimationFrame(animate);
-//     cube.rotation.x += 0.01;
-//     cube.rotation.y += 0.01;
-//     render();
-// }
+function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    // cube.rotation.x += 0.01;
+    // cube.rotation.y += 0.01;
+    render();
+}
 
 init();
-// animate()
+animate()

@@ -34,22 +34,7 @@ const init = () => {
         controls.lock()
     }, false)
 
-    const onKeyDown = (event) => {
-        switch (event.code) {
-            case 'KeyW':
-                controls.moveForward(0.25)
-                break
-            case 'KeyA':
-                controls.moveRight(-0.25)
-                break
-            case 'KeyS':
-                controls.moveForward(-0.25)
-                break
-            case 'KeyD':
-                controls.moveRight(0.25)
-                break
-        }
-    }
+     
     document.body.addEventListener('keydown', onKeyDown, false)
 
     // ----------------------------------------------------------
